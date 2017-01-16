@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/EikeVerdenhalven/fftw3.svg?branch=travis_ci_integration)](https://travis-ci.org/EikeVerdenhalven/fftw3)
+
 *DO NOT CHECK OUT THESE FILES FROM GITHUB UNLESS YOU KNOW WHAT YOU ARE
 DOING.*  (See below.)
 
@@ -18,4 +20,3 @@ compiled on any system with a C compiler.
 Advanced users and FFTW maintainers can obtain code from github and
 run the generation process themselves.  This is a long process that
 requires special tools.  See README for details.
-
