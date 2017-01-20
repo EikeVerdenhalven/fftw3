@@ -23,6 +23,15 @@ option(FFTW_MAINTENANCE_MODE "Enable Maintainer mode" OFF)
 option(FFTW_ENABLE_SHARED "Build shared library" OFF)
 option(FFTW_ENABLE_STATIC "Build static library" ON)
 
+# -- Amalgamation builds
+
+option(FFTW_USE_AMALGAMATES "Build with amalgamates" OFF)
+
+if(FFTW_USE_AMALGAMATES)
+  set(FFTW_amalgamation_script ${CMAKE_SOURCE_DIR}/cmake/amalgamate.cmake)
+endif()
+
+
 # -- Floating point precision
 
 set(FFTW_KNOWN_PRECISIONS single double long quad )

@@ -1,0 +1,5 @@
+file(WRITE ${DSTFILE} "// FFTW amalgamate ${DSTFILE}\n")
+foreach(_file IN LISTS SRCFILES)
+  file(READ ${_file} _file_content)
+  file(APPEND ${DSTFILE} "#include \"${SRCDIR}/${_file}\"\n")
+endforeach()
