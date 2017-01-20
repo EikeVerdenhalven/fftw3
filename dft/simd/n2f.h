@@ -18,6 +18,12 @@
  *
  */
 
+#ifndef __DFT_SIMD_N2F_H__
+#define __DFT_SIMD_N2F_H__
+#ifdef GENUS
+#error GENUS already defined!!
+#endif
+
 #include SIMD_HEADER
 
 #undef LD
@@ -25,3 +31,5 @@
 
 #define GENUS XSIMD(dft_n2fsimd_genus)
 extern const kdft_genus GENUS;
+
+#endif

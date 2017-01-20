@@ -133,7 +133,7 @@ let speclist = [
 let sqrt_half = Complex.inverse_int_sqrt 2
 let sqrt_two = Complex.int_sqrt 2
 
-let rescale sc s1 s2 input i = 
+let rescale sc s1 s2 input i =
   if ((i == s1 || i == s2) && !unitary) then
     Complex.times (input i) sc
   else
@@ -143,12 +143,12 @@ let generate n mode =
   let iarray = "I"
   and oarray = "O"
   and istride = "is"
-  and ostride = "os" 
-  and i = "i" 
-  and v = "v" 
+  and ostride = "os"
+  and i = "i"
+  and v = "v"
   in
 
-  let sign = !Genutil.sign 
+  let sign = !Genutil.sign
   and name = !Magic.codelet_name in
 
   let vistride = either_stride (!uistride) (C.SVar istride)
@@ -172,17 +172,17 @@ let generate n mode =
   | RODFT11 -> Trig.dstIV, load_array_r, store_array_r, -1,-1,-1,-1
   | _ -> failwith "must specify transform kind"
   in
-    
+
   let locations = unique_array_c n in
-  let input = locative_array_c n 
+  let input = locative_array_c n
       (C.array_subscript iarray vistride)
       (C.array_subscript "BUG" vistride)
       locations sivs in
   let output = rescale sqrt_half so1 so2
       ((Complex.times (Complex.inverse_int_sqrt !normsqr))
        @@ (transform n (rescale sqrt_two si1 si2 (load_array_c n input)))) in
-  let oloc = 
-    locative_array_c n 
+  let oloc =
+    locative_array_c n
       (C.array_subscript oarray vostride)
       (C.array_subscript "BUG" vostride)
       locations sovs in
@@ -193,7 +193,7 @@ let generate n mode =
     [Decl ("INT", i)],
     [For (Expr_assign (CVar i, CVar v),
 	  Binop (" > ", CVar i, Integer 0),
-	  list_to_comma 
+	  list_to_comma
 	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (Integer 1)]);
 	     Expr_assign (CVar iarray, CPlus [CVar iarray; CVar sivs]);
 	     Expr_assign (CVar oarray, CPlus [CVar oarray; CVar sovs]);
@@ -208,22 +208,22 @@ let generate n mode =
     Fcn ((if !Magic.standalone then "void" else "static void"), name,
 	 ([Decl (C.constrealtypep, iarray);
 	   Decl (C.realtypep, oarray)]
-	  @ (if stride_fixed !uistride then [] 
+	  @ (if stride_fixed !uistride then []
                else [Decl (C.stridetype, istride)])
-	  @ (if stride_fixed !uostride then [] 
+	  @ (if stride_fixed !uostride then []
 	       else [Decl (C.stridetype, ostride)])
 	  @ (if !noloop then [] else
                [Decl ("INT", v)]
-	       @ (if stride_fixed !uivstride then [] 
+	       @ (if stride_fixed !uivstride then []
                     else [Decl ("INT", "ivs")])
-	       @ (if stride_fixed !uovstride then [] 
+	       @ (if stride_fixed !uovstride then []
                     else [Decl ("INT", "ovs")]))),
 	 finalize_fcn body)
 
-  in let desc = 
-    Printf.sprintf 
-      "static const kr2r_desc desc = { %d, \"%s\", %s, &GENUS, %s };\n\n"
-      n name (flops_of tree) 
+  in let desc =
+    Printf.sprintf
+      "static const kr2r_desc desc%s = { %d, \"%s\", %s, &GENUS, %s };\n\n"
+      name n name (flops_of tree)
       (match mode with
       | RDFT -> "RDFT00"
       | HDFT -> "HDFT00"
@@ -241,7 +241,7 @@ let generate n mode =
   and init =
     (declare_register_fcn name) ^
     "{" ^
-    "  X(kr2r_register)(p, " ^ name ^ ", &desc);\n" ^
+    "  X(kr2r_register)(p, " ^ name ^ ", &desc" ^ name ^ ");\n" ^
     "}\n"
 
   in

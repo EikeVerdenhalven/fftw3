@@ -57,7 +57,7 @@ let speclist = [
   "-dft-III",
   Arg.Unit(fun () -> dftIII_flag := true),
   " produce shifted dftIII-style codelets"
-] 
+]
 
 let hcdftIII sign n input =
   let input' i =
@@ -66,20 +66,20 @@ let hcdftIII sign n input =
     else
       let i' = (i - 1) / 2 in
       if (2 * i' < n - 1) then (input i')
-      else if (2 * i' == n - 1) then 
+      else if (2 * i' == n - 1) then
 	Complex.real (input i')
-      else 
-	Complex.conj (input (n - 1 - i')) 
+      else
+	Complex.conj (input (n - 1 - i'))
   in Fft.dft sign (2 * n) input'
 
 let generate n =
   let ar0 = "R0" and ar1 = "R1" and acr = "Cr" and aci = "Ci"
-  and rs = "rs" and csr = "csr" and csi = "csi" 
+  and rs = "rs" and csr = "csr" and csi = "csi"
   and i = "i" and v = "v"
   and transform = if !dftIII_flag then hcdftIII else Trig.hdft
   in
 
-  let sign = !Genutil.sign 
+  let sign = !Genutil.sign
   and name = !Magic.codelet_name in
 
   let vrs = either_stride (!urs) (C.SVar rs)
@@ -91,19 +91,19 @@ let generate n =
   let sivs = stride_to_string "ivs" !uivs in
 
   let locations = unique_array_c n in
-  let input = 
-    locative_array_c n 
+  let input =
+    locative_array_c n
       (C.array_subscript acr vcsr)
       (C.array_subscript aci vcsi)
       locations sivs in
   let output = transform sign n (load_array_hc n input) in
-  let oloce = 
-    locative_array_c n 
+  let oloce =
+    locative_array_c n
       (C.array_subscript ar0 vrs)
       (C.array_subscript "BUG" vrs)
       locations sovs
-  and oloco = 
-    locative_array_c n 
+  and oloco =
+    locative_array_c n
       (C.array_subscript ar1 vrs)
       (C.array_subscript "BUG" vrs)
       locations sovs in
@@ -115,7 +115,7 @@ let generate n =
     [Decl ("INT", i)],
     [For (Expr_assign (CVar i, CVar v),
 	  Binop (" > ", CVar i, Integer 0),
-	  list_to_comma 
+	  list_to_comma
 	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (Integer 1)]);
 	     Expr_assign (CVar ar0, CPlus [CVar ar0; CVar sovs]);
 	     Expr_assign (CVar ar1, CPlus [CVar ar1; CVar sovs]);
@@ -143,15 +143,15 @@ let generate n =
 	   Decl ("INT", "ovs")]),
 	 finalize_fcn body)
 
-  in let desc = 
-    Printf.sprintf 
-      "static const kr2c_desc desc = { %d, \"%s\", %s, &GENUS };\n\n"
-      n name (flops_of tree) 
+  in let desc =
+    Printf.sprintf
+      "static const kr2c_desc desc%s = { %d, \"%s\", %s, &GENUS };\n\n"
+      name n name (flops_of tree)
 
   and init =
     (declare_register_fcn name) ^
     "{" ^
-    "  X(kr2c_register)(p, " ^ name ^ ", &desc);\n" ^
+    "  X(kr2c_register)(p, " ^ name ^ ", &desc" ^ name ^ ");\n" ^
     "}\n"
 
   in

@@ -18,6 +18,13 @@
  *
  */
 
+#ifndef __RDFT_SIMD_HC2CBV_H__
+#define __RDFT_SIMD_HC2CBV_H__
+
+#ifdef GENUS
+#error GENUS already defined
+#endif
+
 #include SIMD_HEADER
 
 #define VTW VTW3
@@ -26,3 +33,5 @@
 
 #define GENUS XSIMD(rdft_hc2cbv_genus)
 extern const hc2c_genus GENUS;
+
+#endif

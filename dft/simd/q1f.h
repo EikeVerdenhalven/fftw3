@@ -18,6 +18,12 @@
  *
  */
 
+#ifndef __DFT_SIMD_Q1F_H__
+#define __DFT_SIMD_Q1F_H__
+#ifdef GENUS
+#error GENUS already defined!!
+#endif
+
 #include SIMD_HEADER
 
 #define VTW VTW1
@@ -28,3 +34,4 @@
 #define GENUS XSIMD(dft_q1fsimd_genus)
 extern const ct_genus GENUS;
 
+#endif

@@ -77,7 +77,23 @@ if(FFTW_MAINTENANCE_MODE)
 
 endif()
 
-add_library(fftw_dft_scalar_codelets OBJECT ${fftw_dft_scalar_codelets} ${CMAKE_CURRENT_SOURCE_DIR}/codlist.c)
+
+if(FFTW_USE_AMALGAMATES)
+  include(${CMAKE_SOURCE_DIR}/cmake/make_amalgamate.cmake)
+  make_amalgamate(T_code ${CMAKE_CURRENT_BINARY_DIR}/dft_scalar_T_ALL.c ${CMAKE_CURRENT_SOURCE_DIR})
+  make_amalgamate(N_code ${CMAKE_CURRENT_BINARY_DIR}/dft_scalar_N_ALL.c ${CMAKE_CURRENT_SOURCE_DIR})
+  make_amalgamate(F_code ${CMAKE_CURRENT_BINARY_DIR}/dft_scalar_F_ALL.c ${CMAKE_CURRENT_SOURCE_DIR})
+  make_amalgamate(Q_code ${CMAKE_CURRENT_BINARY_DIR}/dft_scalar_Q_ALL.c ${CMAKE_CURRENT_SOURCE_DIR})
+  add_library(fftw_dft_scalar_codelets OBJECT
+    ${CMAKE_CURRENT_BINARY_DIR}/dft_scalar_T_ALL.c
+    ${CMAKE_CURRENT_BINARY_DIR}/dft_scalar_N_ALL.c
+    ${CMAKE_CURRENT_BINARY_DIR}/dft_scalar_F_ALL.c
+    ${CMAKE_CURRENT_BINARY_DIR}/dft_scalar_Q_ALL.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/codlist.c
+  )
+else()
+  add_library(fftw_dft_scalar_codelets OBJECT ${fftw_dft_scalar_codelets} ${CMAKE_CURRENT_SOURCE_DIR}/codlist.c)
+endif()
 target_include_directories(fftw_dft_scalar_codelets PRIVATE
   ${fftw_config_path}
   ${CMAKE_SOURCE_DIR}/kernel

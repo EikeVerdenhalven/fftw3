@@ -63,13 +63,13 @@ let speclist = [
 let generate n =
   let rioarray = "x"
   and rs = "rs" and vs = "vs"
-  and twarray = "W" 
+  and twarray = "W"
   and m = "m" and mb = "mb" and me = "me" and ms = "ms" in
 
-  let sign = !Genutil.sign 
-  and name = !Magic.codelet_name 
-  and byvl x = choose_simd x (ctimes (CVar "VL", x)) 
-  and bytwvl x = choose_simd x (ctimes (CVar "TWVL", x)) 
+  let sign = !Genutil.sign
+  and name = !Magic.codelet_name
+  and byvl x = choose_simd x (ctimes (CVar "VL", x))
+  and bytwvl x = choose_simd x (ctimes (CVar "TWVL", x))
   and bytwvl_vl x = choose_simd x (ctimes (CVar "(TWVL/VL)", x)) in
   let ename = expand_name name in
 
@@ -90,15 +90,15 @@ let generate n =
 
   let locations = unique_v_array_c n n in
 
-  let ioi = 
-    locative_v_array_c n n 
-      (C.varray_subscript rioarray svs srs) 
-      (C.varray_subscript "BUG" svs srs) 
+  let ioi =
+    locative_v_array_c n n
+      (C.varray_subscript rioarray svs srs)
+      (C.varray_subscript "BUG" svs srs)
       locations sms
-  and ioo = 
-    locative_v_array_c n n 
-      (C.varray_subscript rioarray svs srs) 
-      (C.varray_subscript "BUG" svs srs) 
+  and ioo =
+    locative_v_array_c n n
+      (C.varray_subscript rioarray svs srs)
+      (C.varray_subscript "BUG" svs srs)
       locations sms
   in
 
@@ -122,23 +122,23 @@ let generate n =
 		  CVar (if (sign < 0) then "ri" else "ii"));
      For (list_to_comma
 	    [Expr_assign (vm, vmb);
-	     Expr_assign (CVar twarray, 
-			  CPlus [CVar twarray; 
-				 ctimes (vmb, 
+	     Expr_assign (CVar twarray,
+			  CPlus [CVar twarray;
+				 ctimes (vmb,
 					 bytwvl_vl (Integer nt))])],
 	  Binop (" < ", vm, vme),
-	  list_to_comma 
+	  list_to_comma
 	    [Expr_assign (vm, CPlus [vm; byvl (Integer 1)]);
-	     Expr_assign (CVar rioarray, CPlus [CVar rioarray; 
+	     Expr_assign (CVar rioarray, CPlus [CVar rioarray;
 						byvl (CVar sms)]);
-	     Expr_assign (CVar twarray, CPlus [CVar twarray; 
+	     Expr_assign (CVar twarray, CPlus [CVar twarray;
 					       bytwvl (Integer nt)]);
 	     make_volatile_stride (2*n) (CVar rs);
 	     make_volatile_stride (2*n) (CVar vs)
 	   ],
 	  Asch annot)]) in
 
-  let tree = 
+  let tree =
     Fcn (("static void"), ename,
 	 [Decl (C.realtypep, "ri");
 	  Decl (C.realtypep, "ii");
@@ -150,29 +150,29 @@ let generate n =
 	  Decl ("INT", ms)],
          finalize_fcn body)
   in
-  let twinstr = 
-    Printf.sprintf "static const tw_instr twinstr[] = %s;\n\n" 
-      (twinstr_to_string "VL" (twdesc n))
+  let twinstr =
+    Printf.sprintf "static const tw_instr twinstr%s[] = %s;\n\n"
+      name (twinstr_to_string "VL" (twdesc n))
 
-  and desc = 
+  and desc =
     Printf.sprintf
-      "static const ct_desc desc = {%d, %s, twinstr, &GENUS, %s, %s, %s, %s};\n\n"
-      n (stringify name) (flops_of tree) 
-      (stride_to_solverparm !urs) 
+      "static const ct_desc desc%s = {%d, %s, twinstr%s, &GENUS, %s, %s, %s, %s};\n\n"
+      ename n (stringify name) name (flops_of tree) 
+      (stride_to_solverparm !urs)
       (stride_to_solverparm !uvs)
-      (stride_to_solverparm !ums) 
+      (stride_to_solverparm !ums)
 
-  and register = 
+  and register =
     match !ditdif with
     | DIT -> "X(kdft_ditsq_register)"
     | DIF -> "X(kdft_difsq_register)"
   in
   let init =
-    "\n" ^ 
-    twinstr ^ 
+    "\n" ^
+    twinstr ^
     desc ^
     (declare_register_fcn name) ^
-    (Printf.sprintf "{\n%s(p, %s, &desc);\n}" register ename)
+    (Printf.sprintf "{\n%s(p, %s, &desc%s);\n}" register ename ename)
   in
 
   (unparse tree) ^ "\n" ^ init

@@ -17,7 +17,27 @@ if(FFTW_MAINTENANCE_MODE)
 endif(FFTW_MAINTENANCE_MODE)
 
 if(HAVE_${_vec_extension})
-  add_library(fftw_dft_simd_${_vec_extension}_objects OBJECT ${fftw_dft_simd_${_vec_extension}_codelist})
+  if(FFTW_USE_AMALGAMATES)
+    set(_fftw_simd_codelet_prefixes
+      N1F N2F N1B N2B N2S T1F T2F T3F T1FU T1B T2B T3B T1BU T1S T2S Q1F Q1B
+    )
+    unset(_fftw_dft_simd_${_vec_extension}_amalgam_sources)
+    foreach(_fftw_codelet_prefix IN LISTS _fftw_simd_codelet_prefixes)
+     make_amalgamate(FFTW_dft_simd_${_fftw_codelet_prefix}
+       ${CMAKE_CURRENT_BINARY_DIR}/dft_simd_${_vec_extension}_${_fftw_codelet_prefix}_ALL.c
+       ${CMAKE_CURRENT_SOURCE_DIR}
+     )
+    list(APPEND _fftw_dft_simd_${_vec_extension}_amalgam_sources
+      ${CMAKE_CURRENT_BINARY_DIR}/dft_simd_${_vec_extension}_${_fftw_codelet_prefix}_ALL.c
+    )
+    endforeach()
+    add_library(fftw_dft_simd_${_vec_extension}_objects OBJECT
+      ${_fftw_dft_simd_${_vec_extension}_amalgam_sources}
+      codlist.c genus.c 
+    )
+  else() # == no amalgamates
+    add_library(fftw_dft_simd_${_vec_extension}_objects OBJECT ${fftw_dft_simd_${_vec_extension}_codelist})
+  endif()
   target_include_directories(fftw_dft_simd_${_vec_extension}_objects PRIVATE ${FFTW_dft_simd_includes})
   target_compile_definitions(fftw_dft_simd_${_vec_extension}_objects PRIVATE ${FFTW_${_vec_extension}_DEFINE})
   target_compile_options(fftw_dft_simd_${_vec_extension}_objects PRIVATE ${FFTW_${_vec_extension}_FLAGS})

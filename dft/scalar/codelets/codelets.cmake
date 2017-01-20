@@ -50,4 +50,8 @@ set(F2_code
 set(Q1_code q1_2.c q1_4.c q1_8.c  q1_3.c q1_5.c q1_6.c)
 
 ###########################################################################
-set(fftw_dft_scalar_codelets ${N1_code} ${T1_code} ${T2_code} ${F1_code} ${F2_code} ${Q1_code})
+set(T_code ${T1_code} ${T2_code})
+set(N_code ${N1_code})
+set(F_code ${F1_code} ${F2_code})
+set(Q_code ${Q1_code})
+set(fftw_dft_scalar_codelets ${T_code} ${N_code} ${F_code} ${Q_code} )
