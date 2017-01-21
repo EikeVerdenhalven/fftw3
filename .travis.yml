@@ -1,0 +1,29 @@
+language: c
+sudo: required
+addons:
+  apt:
+    packages:
+      - clang
+      - clang-format-3.4
+      - ninja-build
+
+before_install: sudo apt-get update
+install:
+  - bash -ex .travis-cmake.sh
+  - wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-opam.sh
+
+before_script: bash -ex .travis-opam.sh
+script:
+  - bash -ex .travis-build.sh
+  - bash -ex .travis-test.sh
+env:
+  - OCAML_VERSION=4.03
+os:
+  - linux
+deploy:
+  provider: releases
+  api_key:
+    secure: QDxKSDiBqFbQels0BBFsoo/VM4fDFbMfZVhWS6qD5XjB4csnxVhAoq3aRV7+OnDvWupOY7bx8Pmm/UsAXoVHb1XZeXie6EnnHeXN4Z5q9sHsn1eMJKwkHpVjOSx9VZqPuCK4RCsf4M4E2WO2wmWI23SWROpn0xz37sLY+0PkdgQG+Ft/T3QtICUA5IDRhx6Vq4yqR2lLVKuhAA1jT/SccldVfiWhsfsGlC5knuwJh8oayhQfwYLTE5QVcIlSqVOkROzxDvlf0OzE+/vhYiuzIAGypj9Fb9RvrpxzUB0L1wnF5vy+jSgANmA3gFAu17C7/00guNolE1KiaCZUdauGnvvYoCOpWJYwX/ScbxN4qiBSV3N3iEUGitsMWhR0kcz26imcNc/VWbP7mcX+hDOB32l9eLulTw/iBZttYfv1XsL2K7F2JBiGUpZ3ULVPbeETgYbnE3nywEvGOSpXI4fLrQ2CsFkQTi2tHkEvVyzD/lBO58E512NOy1baIFwrzE87gvLLdzZH+eR88kUZrtgRDmymtRWf6+YtEk0eGaG/zntIEbIMz+wZxegqGj6jK2onSRDd7zKHBiOHEDHdgSUAlST1YT31a/DMBCLw6+4IGBgd5/brKfh6t0IMDvdEEej7SC1FXP91h/AMEcW0VbbgGsNaWfK2sI+gW3wzfmdIHzI=
+  file: "../build-fftw/fftw3.tar.gz"
+  on:
+    tags: true
