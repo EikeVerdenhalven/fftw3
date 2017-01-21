@@ -47,7 +47,7 @@ let speclist = [
   "-with-ovstride",
   Arg.String(fun x -> uovstride := arg_to_stride x),
   " specialize for given output vector stride"
-] 
+]
 
 let nonstandard_optimizer list_of_buddy_stores dag =
   let sched = standard_scheduler dag in
@@ -59,12 +59,12 @@ let generate n =
   let riarray = "xi"
   and roarray = "xo"
   and istride = "is"
-  and ostride = "os" 
-  and i = "i" 
+  and ostride = "os"
+  and i = "i"
   and v = "v"
   in
 
-  let sign = !Genutil.sign 
+  let sign = !Genutil.sign
   and name = !Magic.codelet_name
   and byvl x = choose_simd x (ctimes (CVar "VL", x))  in
   let ename = expand_name name in
@@ -79,14 +79,14 @@ let generate n =
   let fft = Trig.dft_via_rdft in
 
   let locations = unique_array_c n in
-  let input = 
-    locative_array_c n 
+  let input =
+    locative_array_c n
       (C.array_subscript riarray vistride)
       (C.array_subscript "BUG" vistride)
       locations sivs in
   let output = fft sign n (load_array_r n input) in
-  let oloc = 
-    locative_array_c n 
+  let oloc =
+    locative_array_c n
       (C.array_subscript roarray vostride)
       (C.array_subscript "BUG" vostride)
       locations sovs in
@@ -94,9 +94,9 @@ let generate n =
     let k = !Simdmagic.store_multiple in
     if (k > 1) then
       if (n mod k == 0) then
-	List.map 
+	List.map
 	  (fun i -> List.map (fun j -> (fst (oloc (k * i + j)))) (iota k))
-	  (iota (n / k)) 
+	  (iota (n / k))
       else failwith "invalid n for -store-multiple"
     else []
   in
@@ -111,11 +111,11 @@ let generate n =
      Stmt_assign (CVar roarray, CVar (if (sign < 0) then "ro" else "io"));
      For (Expr_assign (CVar i, CVar v),
 	  Binop (" > ", CVar i, Integer 0),
-	  list_to_comma 
+	  list_to_comma
 	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (byvl (Integer 1))]);
-	     Expr_assign (CVar riarray, CPlus [CVar riarray; 
+	     Expr_assign (CVar riarray, CPlus [CVar riarray;
 					       byvl (CVar sivs)]);
-	     Expr_assign (CVar roarray, CPlus [CVar roarray; 
+	     Expr_assign (CVar roarray, CPlus [CVar roarray;
 					       byvl (CVar sovs)]);
 	     make_volatile_stride (2*n) (CVar istride);
 	     make_volatile_stride (2*n) (CVar ostride)
@@ -136,12 +136,12 @@ let generate n =
 	   Decl ("INT", "ivs");
 	   Decl ("INT", "ovs")]),
 	 finalize_fcn body)
-      
+
   in
-  let desc = 
-    Printf.sprintf 
-      "static const kdft_desc desc = { %d, %s, %s, &GENUS, %s, %s, %s, %s };\n"
-      n (stringify name) (flops_of tree) 
+  let desc =
+    Printf.sprintf
+      "static const kdft_desc desc%s = { %d, %s, %s, &GENUS, %s, %s, %s, %s };\n"
+      name n (stringify name) (flops_of tree)
       (stride_to_solverparm !uistride) (stride_to_solverparm !uostride)
       (choose_simd "0" (stride_to_solverparm !uivstride))
       (choose_simd "0" (stride_to_solverparm !uovstride))
@@ -149,10 +149,10 @@ let generate n =
   and init =
     (declare_register_fcn name) ^
     "{" ^
-    "  X(kdft_register)(p, " ^ ename ^ ", &desc);\n" ^
+    "  X(kdft_register)(p, " ^ ename ^ ", &desc" ^ ename ^ ");\n" ^
     "}\n"
 
-  in ((unparse tree) ^ "\n" ^ 
+  in ((unparse tree) ^ "\n" ^
 	(if !Magic.standalone then "" else desc ^ init))
 
 let main () =

@@ -18,6 +18,14 @@
  *
  */
 
+#ifndef __DFT_SCALAR_T_H__
+#define __DFT_SCALAR_T_H__
+
+#ifdef GENUS
+#error GENUS already defined!!!
+#endif
 
 #define GENUS X(dft_t_genus)
 extern const ct_genus GENUS;
+
+#endif

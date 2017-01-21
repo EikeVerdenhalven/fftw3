@@ -18,6 +18,14 @@
  *
  */
 
+#ifndef __RDFT_SCALAR_HB_H__
+#define __RDFT_SCALAR_HB_H__
+
+#ifdef GENUS
+#error GENUS already defined
+#endif
 
 #define GENUS X(rdft_hb_genus)
 extern const hc2hc_genus GENUS;
+
+#endif

@@ -18,7 +18,17 @@ if(FFTW_MAINTENANCE_MODE)
 endif(FFTW_MAINTENANCE_MODE)
 
 if(HAVE_${_vec_extension})
-  add_library(fftw_rdft_simd_${_vec_extension}_objects OBJECT ${fftw_rdft_simd_${_vec_extension}_sources})
+  if(FFTW_USE_AMALGAMATES)
+    make_amalgamate(HC2CFDFTV ${CMAKE_CURRENT_BINARY_DIR}/fftw_rdft_simd_${_vec_extension}_HC2CFDFTV_ALL.c ${CMAKE_CURRENT_SOURCE_DIR})
+    make_amalgamate(HC2CBDFTV ${CMAKE_CURRENT_BINARY_DIR}/fftw_rdft_simd_${_vec_extension}_HC2CBDFTV_ALL.c ${CMAKE_CURRENT_SOURCE_DIR})
+    add_library(fftw_rdft_simd_${_vec_extension}_objects OBJECT
+      ${CMAKE_CURRENT_BINARY_DIR}/fftw_rdft_simd_${_vec_extension}_HC2CFDFTV_ALL.c
+      ${CMAKE_CURRENT_BINARY_DIR}/fftw_rdft_simd_${_vec_extension}_HC2CBDFTV_ALL.c
+      genus.c codlist.c
+    )
+  else()
+    add_library(fftw_rdft_simd_${_vec_extension}_objects OBJECT ${fftw_rdft_simd_${_vec_extension}_sources})
+  endif()
   target_include_directories(fftw_rdft_simd_${_vec_extension}_objects PRIVATE ${FFTW_rdft_simd_include_dirs})
   target_compile_options(fftw_rdft_simd_${_vec_extension}_objects PRIVATE ${FFTW_${_vec_extension}_FLAGS})
   target_compile_definitions(fftw_rdft_simd_${_vec_extension}_objects PRIVATE ${FFTW_${_vec_extension}_DEFINE})

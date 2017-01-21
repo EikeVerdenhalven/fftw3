@@ -18,6 +18,12 @@
  *
  */
 
+#ifndef __DFT_SIMD_T1F_H__
+#define __DFT_SIMD_T1F_H__
+#ifdef GENUS
+#error GENUS already defined!!
+#endif
+
 #include SIMD_HEADER
 
 #undef LD
@@ -33,3 +39,4 @@
 #define GENUS XSIMD(dft_t1fsimd_genus)
 extern const ct_genus GENUS;
 
+#endif

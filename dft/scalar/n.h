@@ -18,6 +18,14 @@
  *
  */
 
+#ifndef __DFT_SCALAR_N_H__
+#define __DFT_SCALAR_N_H__
+
+#ifdef GENUS
+#error GENUS already defined!!!
+#endif
 
 #define GENUS X(dft_n_genus)
 extern const kdft_genus GENUS;
+
+#endif

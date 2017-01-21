@@ -56,8 +56,8 @@ let generate n =
   and twarray = "W"
   and m = "m" and mb = "mb" and me = "me" and ms = "ms" in
 
-  let sign = !Genutil.sign 
-  and name = !Magic.codelet_name 
+  let sign = !Genutil.sign
+  and name = !Magic.codelet_name
   and byvl x = choose_simd x (ctimes (CVar "(2 * VL)", x)) in
   let ename = expand_name name in
 
@@ -70,13 +70,13 @@ let generate n =
   let sms = stride_to_string "ms" !ums in
 
   let locations = unique_array_c n in
-  let iloc = 
-    locative_array_c n 
+  let iloc =
+    locative_array_c n
       (C.array_subscript rioarray vrs)
       (C.array_subscript iioarray vrs)
       locations sms
-  and oloc = 
-    locative_array_c n 
+  and oloc =
+    locative_array_c n
       (C.array_subscript rioarray vrs)
       (C.array_subscript iioarray vrs)
       locations sms
@@ -96,24 +96,24 @@ let generate n =
     [Decl ("INT", m)],
     [For (list_to_comma
 	    [Expr_assign (vm, vmb);
-	     Expr_assign (CVar twarray, 
-			  CPlus [CVar twarray; 
+	     Expr_assign (CVar twarray,
+			  CPlus [CVar twarray;
 				 ctimes (vmb, Integer nt)])],
 	  Binop (" < ", vm, vme),
-	  list_to_comma 
+	  list_to_comma
 	    [Expr_assign (vm, CPlus [vm; byvl (Integer 1)]);
-	     Expr_assign (CVar rioarray, CPlus [CVar rioarray; 
+	     Expr_assign (CVar rioarray, CPlus [CVar rioarray;
 						byvl (CVar sms)]);
-	     Expr_assign (CVar iioarray, CPlus [CVar iioarray; 
+	     Expr_assign (CVar iioarray, CPlus [CVar iioarray;
 						byvl (CVar sms)]);
-	     Expr_assign (CVar twarray, CPlus [CVar twarray; 
+	     Expr_assign (CVar twarray, CPlus [CVar twarray;
 					       byvl (Integer nt)]);
 	     make_volatile_stride (2*n) (CVar rs)
 	    ],
 	  Asch annot)])
   in
 
-  let tree = 
+  let tree =
     Fcn (((if !Magic.standalone then "" else "static ") ^ "void"),
 	 ename,
 	 [Decl (C.realtypep, rioarray);
@@ -125,16 +125,16 @@ let generate n =
 	  Decl ("INT", ms)],
          finalize_fcn body)
   in
-  let twinstr = 
-    Printf.sprintf "static const tw_instr twinstr[] = %s;\n\n" 
-      (twinstr_to_string "(2 * VL)" (twdesc n))
-  and desc = 
+  let twinstr =
+    Printf.sprintf "static const tw_instr twinstr%s[] = %s;\n\n"
+      name (twinstr_to_string "(2 * VL)" (twdesc n))
+  and desc =
     Printf.sprintf
-      "static const ct_desc desc = {%d, %s, twinstr, &GENUS, %s, %s, %s, %s};\n\n"
-      n (stringify name) (flops_of tree) 
+      "static const ct_desc desc%s = {%d, %s, twinstr%s, &GENUS, %s, %s, %s, %s};\n\n"
+      name n (stringify name) name (flops_of tree)
       (stride_to_solverparm !urs) "0"
-      (stride_to_solverparm !ums) 
-  and register = 
+      (stride_to_solverparm !ums)
+  and register =
     match !ditdif with
     | DIT -> "X(kdft_dit_register)"
     | DIF -> "X(kdft_dif_register)"
@@ -142,10 +142,10 @@ let generate n =
   in
   let init =
     "\n" ^
-    twinstr ^ 
+    twinstr ^
     desc ^
     (declare_register_fcn name) ^
-    (Printf.sprintf "{\n%s(p, %s, &desc);\n}" register ename)
+    (Printf.sprintf "{\n%s(p, %s, &desc%s);\n}" register ename name)
   in
 
   (unparse tree) ^ "\n" ^
@@ -153,7 +153,7 @@ let generate n =
 
 
 let main () =
-  begin 
+  begin
     parse (speclist @ Twiddle.speclist) usage;
     print_string (generate (check_size ()));
   end

@@ -68,10 +68,10 @@ let generate n =
 
   in
 
-  let sign = !Genutil.sign 
-  and name = !Magic.codelet_name 
-  and byvl x = choose_simd x (ctimes (CVar "VL", x)) 
-  and bytwvl x = choose_simd x (ctimes (CVar "TWVL", x)) 
+  let sign = !Genutil.sign
+  and name = !Magic.codelet_name
+  and byvl x = choose_simd x (ctimes (CVar "VL", x))
+  and bytwvl x = choose_simd x (ctimes (CVar "TWVL", x))
   and bytwvl_vl x = choose_simd x (ctimes (CVar "(TWVL/VL)", x)) in
 
   let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy 1 true in
@@ -87,19 +87,19 @@ let generate n =
   let the_location = (Unique.make (), Unique.make ()) in
   let locations _ = the_location in
 
-  let rlocp = (locative_array_c n 
+  let rlocp = (locative_array_c n
 		 (C.array_subscript arp vrs)
 		 (C.array_subscript aip vrs)
 		 locations sms)
-  and rlocm = (locative_array_c n 
+  and rlocm = (locative_array_c n
 		 (C.array_subscript arm vrs)
 		 (C.array_subscript aim vrs)
 		 locations msms)
-  and clocp = (locative_array_c n 
+  and clocp = (locative_array_c n
 		 (C.array_subscript arp vrs)
 		 (C.array_subscript aip vrs)
 		 locations sms)
-  and clocm = (locative_array_c n 
+  and clocm = (locative_array_c n
 		 (C.array_subscript arm vrs)
 		 (C.array_subscript aim vrs)
 		 locations msms)
@@ -107,69 +107,69 @@ let generate n =
   let rloc i = if i mod 2 == 0 then rlocp (i/2) else rlocm ((i-1)/2)
   and cloc i = if i < n - i then clocp i else clocm (n-1-i)
   and sym n f i =
-    if (i < n - i) then 
+    if (i < n - i) then
       f i
-    else 
+    else
       Complex.times (Complex.nan Expr.CONJ) (f i)
-  and sym1 f i = 
+  and sym1 f i =
     if i mod 2 == 0 then
-      Complex.plus [f i; 
+      Complex.plus [f i;
 		    Complex.times (Complex.nan Expr.CONJ) (f (i+1))]
     else
       Complex.times (Complex.nan Expr.I)
 	(Complex.plus [Complex.uminus (f (i-1));
 		       Complex.times (Complex.nan Expr.CONJ) (f i)])
-  and sym1i f i = 
+  and sym1i f i =
     if i mod 2 == 0 then
-      Complex.plus [f i; 
+      Complex.plus [f i;
 		    Complex.times (Complex.nan Expr.I) (f (i+1))]
     else
       Complex.times (Complex.nan Expr.CONJ)
-	(Complex.plus [f (i-1); 
+	(Complex.plus [f (i-1);
 		       Complex.uminus
 			 (Complex.times (Complex.nan Expr.I) (f i))])
   in
 
-  let asch = 
+  let asch =
     match !ditdif with
-    | DIT -> 
-	let output = 
+    | DIT ->
+	let output =
 	  (Complex.times Complex.half) @@
 	    (Trig.dft_via_rdft sign n (byw (sym1 (load_array_r n rloc)))) in
 	let odag = store_array_r n cloc (sym n output) in
-	  standard_optimizer odag 
+	  standard_optimizer odag
 
-    | DIF -> 
-	let output = 
+    | DIF ->
+	let output =
 	  byw (Trig.dft_via_rdft sign n (sym n (load_array_r n cloc)))
 	in
 	let odag = store_array_r n rloc (sym1i output) in
-	  standard_optimizer odag 
+	  standard_optimizer odag
   in
 
-  let vms = CVar sms 
+  let vms = CVar sms
   and varp = CVar arp
   and vaip = CVar aip
   and varm = CVar arm
   and vaim = CVar aim
-  and vm = CVar m and vmb = CVar mb and vme = CVar me 
+  and vm = CVar m and vmb = CVar mb and vme = CVar me
   in
   let body = Block (
     [Decl ("INT", m)],
     [For (list_to_comma
 	    [Expr_assign (vm, vmb);
-	     Expr_assign (CVar twarray, 
-			  CPlus [CVar twarray; 
+	     Expr_assign (CVar twarray,
+			  CPlus [CVar twarray;
 				 ctimes (CPlus [vmb; CUminus (Integer 1)],
 					 bytwvl_vl (Integer nt))])],
 	  Binop (" < ", vm, vme),
-	  list_to_comma 
+	  list_to_comma
 	    [Expr_assign (vm, CPlus [vm; byvl (Integer 1)]);
 	     Expr_assign (varp, CPlus [varp; byvl vms]);
 	     Expr_assign (vaip, CPlus [vaip; byvl vms]);
 	     Expr_assign (varm, CPlus [varm; CUminus (byvl vms)]);
 	     Expr_assign (vaim, CPlus [vaim; CUminus (byvl vms)]);
-	     Expr_assign (CVar twarray, CPlus [CVar twarray; 
+	     Expr_assign (CVar twarray, CPlus [CVar twarray;
 					       bytwvl (Integer nt)]);
 	     make_volatile_stride (4*n) (CVar rs)
 	   ],
@@ -177,7 +177,7 @@ let generate n =
     )
   in
 
-  let tree = 
+  let tree =
     Fcn ("static void", name,
 	 [Decl (C.realtypep, arp);
 	  Decl (C.realtypep, aip);
@@ -190,29 +190,29 @@ let generate n =
 	  Decl ("INT", ms)],
          finalize_fcn body)
   in
-  let twinstr = 
-    Printf.sprintf "static const tw_instr twinstr[] = %s;\n\n" 
-      (twinstr_to_string "VL" (twdesc n))
-  and desc = 
+  let twinstr =
+    Printf.sprintf "static const tw_instr twinstr%s[] = %s;\n\n"
+      name (twinstr_to_string "VL" (twdesc n))
+  and desc =
     Printf.sprintf
-      "static const hc2c_desc desc = {%d, %s, twinstr, &GENUS, %s};\n\n"
-      n (stringify name) (flops_of tree)
+      "static const hc2c_desc desc%s = {%d, %s, twinstr%s, &GENUS, %s};\n\n"
+      name n (stringify name) name (flops_of tree)
   and register = "X(khc2c_register)"
 
   in
   let init =
     "\n" ^
-    twinstr ^ 
+    twinstr ^
     desc ^
     (declare_register_fcn name) ^
-    (Printf.sprintf "{\n%s(p, %s, &desc, HC2C_VIA_DFT);\n}" register name)
+    (Printf.sprintf "{\n%s(p, %s, &desc%s, HC2C_VIA_DFT);\n}" register name name)
   in
 
   (unparse tree) ^ "\n" ^ init
 
 
 let main () =
-  begin 
+  begin
     Simdmagic.simd_mode := true;
     parse (speclist @ Twiddle.speclist) usage;
     print_string (generate (check_size ()));

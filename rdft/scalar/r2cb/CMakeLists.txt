@@ -93,7 +93,28 @@ if(FFTW_MAINTENANCE_MODE)
   )
 endif(FFTW_MAINTENANCE_MODE)
 
-add_library(fftw_rdft_scalar_r2cb_objects OBJECT ${fftw_rdft_scalar_codelets} codlist.c)
+if(FFTW_USE_AMALGAMATES)
+  set(fftw_rdft_scalar_r2cb_groups
+    R2CB HB HB2 R2CBIII HC2CB HC2CBDFT HC2CB2 HC2CBDFT2
+  )
+  include(${CMAKE_SOURCE_DIR}/cmake/make_amalgamate.cmake)
+  unset(fftw_rdft_scalar_r2cb_amalgamates)
+  foreach(r2cb_group IN LISTS fftw_rdft_scalar_r2cb_groups)
+    make_amalgamate(${r2cb_group}
+      ${CMAKE_CURRENT_BINARY_DIR}/rdft_scalar_r2cb_${r2cb_group}_ALL.c
+      ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+    list(APPEND fftw_rdft_scalar_r2cb_amalgamates
+      ${CMAKE_CURRENT_BINARY_DIR}/rdft_scalar_r2cb_${r2cb_group}_ALL.c
+    )
+  endforeach()
+  add_library(fftw_rdft_scalar_r2cb_objects OBJECT
+    ${fftw_rdft_scalar_r2cb_amalgamates}
+    codlist.c
+  )
+else()
+  add_library(fftw_rdft_scalar_r2cb_objects OBJECT ${fftw_rdft_scalar_codelets} codlist.c)
+endif()
 target_include_directories(fftw_rdft_scalar_r2cb_objects PRIVATE
     ${fftw_config_path}
     ${CMAKE_SOURCE_DIR}/kernel
